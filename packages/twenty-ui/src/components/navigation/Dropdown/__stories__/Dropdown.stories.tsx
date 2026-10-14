@@ -391,3 +391,44 @@ export const CollisionPadding: Story = {
     await waitFor(() => expect(menu).not.toBeInTheDocument());
   },
 };
+
+export const InterfaceScale: Story = {
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    const rootStyle = canvasElement.ownerDocument.documentElement.style;
+    const previousZoom = rootStyle.getPropertyValue('zoom');
+    const previousScale = rootStyle.getPropertyValue('--t-zoom');
+    const trigger = within(canvasElement).getByRole('button', {
+      name: 'Record actions',
+    });
+
+    try {
+      for (const scale of [0.9, 1, 1.1, 1.25, 14 / 13]) {
+        rootStyle.setProperty('--t-zoom', String(scale));
+        rootStyle.setProperty('zoom', 'var(--t-zoom)');
+
+        await userEvent.click(trigger);
+        const menu = await body.findByRole('menu', { name: 'Record actions' });
+
+        await waitFor(() => {
+          const triggerBounds = trigger.getBoundingClientRect();
+          const menuBounds = menu.getBoundingClientRect();
+
+          expect(Math.abs(menuBounds.width - 240 * scale)).toBeLessThan(1);
+          expect(Math.abs(menuBounds.left - triggerBounds.left)).toBeLessThan(
+            1,
+          );
+          expect(Math.abs(menuBounds.top - triggerBounds.bottom)).toBeLessThan(
+            1,
+          );
+        });
+
+        await userEvent.keyboard('{Escape}');
+        await waitFor(() => expect(menu).not.toBeInTheDocument());
+      }
+    } finally {
+      rootStyle.setProperty('zoom', previousZoom);
+      rootStyle.setProperty('--t-zoom', previousScale);
+    }
+  },
+};

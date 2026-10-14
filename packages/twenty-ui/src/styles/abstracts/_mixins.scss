@@ -30,3 +30,15 @@
     @content;
   }
 }
+
+// Floating UI measures the anchor in zoomed pixels and writes them into the
+// positioner's transform, so the root interface-scale zoom would apply a second
+// time. Cancelling it on the positioner renders that transform one to one, and
+// the popup restores the scale for its own content.
+@mixin interface-scale-positioner {
+  zoom: calc(1 / var(--t-zoom, 1));
+
+  > * {
+    zoom: var(--t-zoom, 1);
+  }
+}

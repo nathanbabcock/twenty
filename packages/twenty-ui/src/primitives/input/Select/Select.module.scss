@@ -46,6 +46,8 @@
 }
 
 .positioner {
+  @include interface-scale-positioner;
+
   z-index: var(--t-last-layer-z-index);
 }
 
